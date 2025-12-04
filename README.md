@@ -56,7 +56,7 @@ ollama pull llama3.2
 
 ```bash
 # Clone the repository
-git clone https://github.com/YOUR_USERNAME/shlama.git
+git clone https://github.com/xt67/shlama.git
 cd shlama
 
 # Make it executable
