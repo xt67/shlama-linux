@@ -153,6 +153,16 @@ Contributions are welcome! Feel free to:
 
 ---
 
+## 💖 Support
+
+If you find shlama useful, consider supporting its development:
+
+<a href="https://www.buymeacoffee.com/xt67" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" height="50" ></a>
+
+[![Sponsor on GitHub](https://img.shields.io/badge/Sponsor-%E2%9D%A4-pink?logo=github)](https://github.com/sponsors/xt67)
+
+---
+
 ## 📄 License
 
 MIT License - see [LICENSE](LICENSE) for details.
