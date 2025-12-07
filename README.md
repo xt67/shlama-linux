@@ -35,6 +35,34 @@ drwxr-xr-x  2 user user 4096 Dec  4 10:00 Documents
 
 ## 🚀 Installation
 
+### One-Line Install (Recommended)
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/xt67/shlama/main/install.sh | bash
+```
+
+This automatically installs:
+- ✅ shlama
+- ✅ Ollama (if not installed)
+- ✅ Required dependencies (jq, curl)
+- ✅ Downloads the default LLM model
+
+That's it! Start using it:
+```bash
+shlama "list all files"
+```
+
+### Uninstall
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/xt67/shlama/main/uninstall.sh | bash
+```
+
+---
+
+<details>
+<summary><strong>📦 Manual Installation</strong></summary>
+
 ### Prerequisites
 
 1. **Ollama** - Install from [ollama.ai](https://ollama.ai)
@@ -69,6 +97,8 @@ chmod +x shlama
 sudo cp shlama /usr/local/bin/
 shlama "your request"
 ```
+
+</details>
 
 ---
 
