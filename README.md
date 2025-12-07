@@ -2,6 +2,8 @@
 
 *Your terminal llama. Natural language → safe Linux commands. Powered by Ollama.*
 
+> **🪟 Looking for Windows?** Check out [shlama for Windows](https://github.com/xt67/shlama-windows)
+
 shlama is a tiny CLI companion that turns natural language into shell commands using a local LLM (Ollama).  
 You ask for something, it suggests a command, and **you approve before execution**.
 
@@ -212,6 +214,13 @@ If you find shlama useful, consider supporting its development:
 ## 📄 License
 
 MIT License - see [LICENSE](LICENSE) for details.
+
+---
+
+## 🔗 Related
+
+- **[shlama for Windows](https://github.com/xt67/shlama-windows)** - Windows/PowerShell version
+- [Ollama](https://ollama.ai) - Local LLM runtime
 
 ---
 
