@@ -1,0 +1,144 @@
+#!/bin/bash
+
+# 🦙 shlama - Your terminal llama
+# Natural language → safe Linux commands
+# Powered by Ollama
+
+set -e
+
+# Configuration
+MODEL="${SHLAMA_MODEL:-llama3.2}"
+OLLAMA_HOST="${OLLAMA_HOST:-http://localhost:11434}"
+
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+CYAN='\033[0;36m'
+NC='\033[0m' # No Color
+
+# Print colored output
+print_color() {
+    local color=$1
+    local message=$2
+    echo -e "${color}${message}${NC}"
+}
+
+# Check if Ollama is running
+check_ollama() {
+    if ! curl -s "${OLLAMA_HOST}/api/tags" > /dev/null 2>&1; then
+        print_color "$RED" "Error: Ollama is not running."
+        print_color "$YELLOW" "Start it with: ollama serve"
+        exit 1
+    fi
+}
+
+# Generate command from natural language
+generate_command() {
+    local prompt="$1"
+    
+    local system_prompt="You are a Linux command line expert. Convert the user's natural language request into a single, safe shell command. Rules: Output ONLY the command, nothing else. No explanations, no markdown, no code blocks. Use common, safe commands. Prefer non-destructive operations. If the request is unclear or potentially dangerous, output: echo Unable to generate safe command. Never output commands that could cause data loss without explicit user intent."
+
+    # Escape special characters for JSON
+    local escaped_prompt=$(echo "$prompt" | sed 's/\\/\\\\/g; s/"/\\"/g')
+    
+    local response=$(curl -s "${OLLAMA_HOST}/api/generate" \
+        -H "Content-Type: application/json" \
+        -d "{
+            \"model\": \"${MODEL}\",
+            \"prompt\": \"${escaped_prompt}\",
+            \"system\": \"${system_prompt}\",
+            \"stream\": false
+        }" | jq -r '.response' 2>/dev/null)
+    
+    # Clean up the response - remove markdown code blocks, backticks, and whitespace
+    response=$(echo "$response" | tr -d '\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+    response=$(echo "$response" | sed 's/^```[a-z]*//;s/```$//;s/^`//;s/`$//')
+    response=$(echo "$response" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+    
+    echo "$response"
+}
+
+# Main function
+main() {
+    # Check for help flag
+    if [[ "$1" == "-h" || "$1" == "--help" ]]; then
+        echo "🦙 shlama - Your terminal llama"
+        echo ""
+        echo "Usage: shlama \"<natural language request>\""
+        echo ""
+        echo "Examples:"
+        echo "  shlama \"list all files including hidden\""
+        echo "  shlama \"find all python files in current directory\""
+        echo "  shlama \"show disk usage\""
+        echo "  shlama \"install neofetch\""
+        echo ""
+        echo "Environment variables:"
+        echo "  SHLAMA_MODEL    - Ollama model to use (default: llama3.2)"
+        echo "  OLLAMA_HOST     - Ollama API host (default: http://localhost:11434)"
+        echo ""
+        exit 0
+    fi
+
+    # Check for version flag
+    if [[ "$1" == "-v" || "$1" == "--version" ]]; then
+        echo "shlama v1.0.0"
+        exit 0
+    fi
+
+    # Check if a prompt was provided
+    if [[ -z "$1" ]]; then
+        print_color "$RED" "Error: Please provide a natural language request."
+        echo "Usage: shlama \"<request>\""
+        echo "Example: shlama \"list all files\""
+        exit 1
+    fi
+
+    # Check dependencies
+    if ! command -v curl &> /dev/null; then
+        print_color "$RED" "Error: curl is required but not installed."
+        exit 1
+    fi
+
+    if ! command -v jq &> /dev/null; then
+        print_color "$RED" "Error: jq is required but not installed."
+        print_color "$YELLOW" "Install it with: sudo apt install jq"
+        exit 1
+    fi
+
+    # Check if Ollama is running
+    check_ollama
+
+    # Generate the command
+    print_color "$CYAN" "🦙 Thinking..."
+    local suggested_command=$(generate_command "$1")
+
+    if [[ -z "$suggested_command" || "$suggested_command" == "null" ]]; then
+        print_color "$RED" "Error: Failed to generate command."
+        exit 1
+    fi
+
+    # Display the suggested command
+    echo ""
+    print_color "$YELLOW" "Suggested command:"
+    print_color "$GREEN" "$suggested_command"
+    echo ""
+
+    # Ask for confirmation
+    read -p "Run command? (y/N): " -n 1 -r
+    echo ""
+
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        echo ""
+        print_color "$BLUE" "Executing..."
+        echo "─────────────────────────────────────"
+        eval "$suggested_command"
+        echo "─────────────────────────────────────"
+        print_color "$GREEN" "✓ Done"
+    else
+        print_color "$YELLOW" "Command not executed."
+    fi
+}
+
+main "$@"

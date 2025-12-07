@@ -20,3 +20,7 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.temp
+
+# Build artifacts (releases are uploaded separately)
+*.deb
+shlama-build/

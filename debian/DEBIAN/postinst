@@ -1,0 +1,61 @@
+#!/bin/bash
+# Post-installation script for shlama
+
+set -e
+
+# Colors
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+CYAN='\033[0;36m'
+NC='\033[0m'
+
+echo ""
+echo -e "${CYAN}┌─────────────────────────────────────┐${NC}"
+echo -e "${CYAN}│      🦙 shlama installed!           │${NC}"
+echo -e "${CYAN}└─────────────────────────────────────┘${NC}"
+echo ""
+
+# Check if Ollama is installed
+if ! command -v ollama &> /dev/null; then
+    echo -e "${YELLOW}📦 Ollama is required but not installed.${NC}"
+    echo -e "${BLUE}Installing Ollama...${NC}"
+    curl -fsSL https://ollama.ai/install.sh | sh
+    echo -e "${GREEN}✓ Ollama installed${NC}"
+fi
+
+# Start Ollama if not running
+if ! curl -s http://localhost:11434/api/tags &> /dev/null 2>&1; then
+    echo -e "${BLUE}🚀 Starting Ollama service...${NC}"
+    if systemctl is-enabled ollama &> /dev/null 2>&1; then
+        systemctl start ollama || true
+    else
+        nohup ollama serve > /dev/null 2>&1 &
+        sleep 3
+    fi
+fi
+
+# Pull the default model if not present
+MODEL="llama3.2"
+echo -e "${BLUE}📥 Checking for AI model ($MODEL)...${NC}"
+if ! ollama list 2>/dev/null | grep -q "$MODEL"; then
+    echo -e "${YELLOW}Downloading $MODEL model (this may take a few minutes)...${NC}"
+    ollama pull "$MODEL" || echo -e "${YELLOW}⚠ Could not download model. Run 'ollama pull $MODEL' manually.${NC}"
+else
+    echo -e "${GREEN}✓ Model $MODEL already available${NC}"
+fi
+
+echo ""
+echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo -e "${GREEN}  ✅ Setup complete!${NC}"
+echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo ""
+echo -e "  ${CYAN}Try it out:${NC}"
+echo -e "    shlama \"list all files\""
+echo -e "    shlama \"show disk usage\""
+echo ""
+echo -e "  ${YELLOW}Make sure Ollama is running:${NC}"
+echo -e "    ollama serve"
+echo ""
+
+exit 0

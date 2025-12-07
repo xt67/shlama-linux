@@ -35,7 +35,19 @@ drwxr-xr-x  2 user user 4096 Dec  4 10:00 Documents
 
 ## 🚀 Installation
 
-### One-Line Install (Recommended)
+### APT Install (Ubuntu/Debian/Zorin/Mint)
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/xt67/shlama/main/setup-repo.sh | sudo bash
+```
+
+Then you can use apt to manage shlama:
+```bash
+sudo apt install shlama    # Install
+sudo apt remove shlama     # Uninstall
+```
+
+### One-Line Install (All Linux Distros)
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/xt67/shlama/main/install.sh | bash
@@ -55,6 +67,10 @@ shlama "list all files"
 ### Uninstall
 
 ```bash
+# If installed via apt:
+sudo apt remove shlama
+
+# If installed via install.sh:
 curl -fsSL https://raw.githubusercontent.com/xt67/shlama/main/uninstall.sh | bash
 ```
 

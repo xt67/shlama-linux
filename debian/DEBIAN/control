@@ -1,0 +1,14 @@
+Package: shlama
+Version: 1.0.0
+Section: utils
+Priority: optional
+Architecture: all
+Depends: curl, jq
+Maintainer: xt67 <xt67@github.com>
+Description: Your terminal llama - Natural language to shell commands
+ shlama is a CLI tool that converts natural language into safe Linux
+ shell commands using a local LLM (Ollama). You ask for something,
+ it suggests a command, and you approve before execution.
+ .
+ No cloud. No API keys. Just your shell and a llama.
+Homepage: https://github.com/xt67/shlama
