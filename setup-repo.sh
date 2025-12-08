@@ -5,7 +5,7 @@
 set -e
 
 REPO_URL="https://raw.githubusercontent.com/xt67/shlama-linux/main"
-DEB_URL="https://github.com/xt67/shlama-linux/releases/download/v1.0.0/shlama_1.0.0_all.deb"
+DEB_URL="https://github.com/xt67/shlama-linux/releases/download/v1.1.0/shlama_1.1.0_all.deb"
 
 echo ""
 echo "🦙 Setting up shlama repository..."
