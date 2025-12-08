@@ -137,61 +137,31 @@ pull_model() {
             print_color "$GREEN" "✓ Model $saved_model is available"
         else
             print_color "$YELLOW" "⚠ Model $saved_model not downloaded"
-            read -p "Download now? (y/N): " -n 1 -r
-            echo ""
-            if [[ $REPLY =~ ^[Yy]$ ]]; then
-                ollama pull "$saved_model"
-            fi
+            print_color "$YELLOW" "  Run: ollama pull $saved_model"
         fi
         return 0
     fi
     
-    # First time install - show model selection
-    echo ""
-    print_color "$CYAN" "🤖 Choose an AI model:"
-    echo ""
-    echo "  1) llama3.2     - Fast & light (~2GB) [Recommended]"
-    echo "  2) llama3.2:1b  - Fastest, minimal (~1.3GB)"
-    echo "  3) llama3       - Balanced (~4.7GB)"  
-    echo "  4) mistral      - Good quality (~4.1GB)"
-    echo "  5) Skip         - I'll download a model later"
-    echo ""
+    # First time install - use default model (can't read input when piped)
+    # User can change later with: shlama --model
+    local model="${SHLAMA_MODEL:-llama3.2}"
     
-    local model="llama3.2"
-    read -p "Select model [1-5] (default: 1): " -r choice
-    
-    case "$choice" in
-        1|"") model="llama3.2" ;;
-        2) model="llama3.2:1b" ;;
-        3) model="llama3" ;;
-        4) model="mistral" ;;
-        5) 
-            print_color "$YELLOW" "⚠ Skipping model download"
-            print_color "$YELLOW" "  Run 'shlama --model' later to select a model"
-            return 0
-            ;;
-        *) model="llama3.2" ;;
-    esac
-    
-    # Override with environment variable if set
-    model="${SHLAMA_MODEL:-$model}"
+    print_color "$CYAN" "📥 Setting up model: $model"
     
     # Save model to config
     mkdir -p "$(dirname "$config_file")"
     echo "$model" > "$config_file"
     
-    print_color "$YELLOW" "📥 Pulling model ($model)..."
-    
-    # Check if model already exists
+    # Check if model already downloaded
     if ollama list 2>/dev/null | grep -q "$model"; then
-        print_color "$GREEN" "✓ Model $model already downloaded"
+        print_color "$GREEN" "✓ Model $model already available"
     else
-        print_color "$BLUE" "→ Downloading $model (this may take a few minutes)..."
+        print_color "$YELLOW" "📥 Downloading $model (this may take a few minutes)..."
         ollama pull "$model"
         print_color "$GREEN" "✓ Model $model downloaded"
     fi
     
-    print_color "$GREEN" "✓ Model saved. To change later, run: shlama --model"
+    print_color "$BLUE" "💡 To change model later, run: shlama --model"
 }
 
 install_shlama() {
