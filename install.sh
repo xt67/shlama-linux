@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# 🦙 shlama installer
+# [llama] shlama installer
 # One command to install shlama and all dependencies
 
 set -e
@@ -19,10 +19,10 @@ print_color() {
 
 print_banner() {
     echo ""
-    print_color "$CYAN" "  ┌─────────────────────────────────────┐"
-    print_color "$CYAN" "  │         🦙 shlama installer         │"
-    print_color "$CYAN" "  │   Natural language → shell commands │"
-    print_color "$CYAN" "  └─────────────────────────────────────┘"
+    print_color "$CYAN" "  +-------------------------------------+"
+    print_color "$CYAN" "  |         [llama] shlama installer         |"
+    print_color "$CYAN" "  |   Natural language -> shell commands |"
+    print_color "$CYAN" "  +-------------------------------------+"
     echo ""
 }
 
@@ -47,7 +47,7 @@ detect_os() {
 
 install_package() {
     local package=$1
-    print_color "$BLUE" "→ Installing $package..."
+    print_color "$BLUE" "-> Installing $package..."
     
     if command -v apt-get &> /dev/null; then
         sudo apt-get update -qq
@@ -67,57 +67,57 @@ install_package() {
 }
 
 install_dependencies() {
-    print_color "$YELLOW" "📦 Checking dependencies..."
+    print_color "$YELLOW" "[*] Checking dependencies..."
     
     # Check and install curl
     if ! command -v curl &> /dev/null; then
         install_package curl
     else
-        print_color "$GREEN" "✓ curl already installed"
+        print_color "$GREEN" "[OK] curl already installed"
     fi
     
     # Check and install jq
     if ! command -v jq &> /dev/null; then
         install_package jq
     else
-        print_color "$GREEN" "✓ jq already installed"
+        print_color "$GREEN" "[OK] jq already installed"
     fi
 }
 
 install_ollama() {
-    print_color "$YELLOW" "🦙 Checking Ollama..."
+    print_color "$YELLOW" "[llama] Checking Ollama..."
     
     if command -v ollama &> /dev/null; then
-        print_color "$GREEN" "✓ Ollama already installed"
+        print_color "$GREEN" "[OK] Ollama already installed"
     else
-        print_color "$BLUE" "→ Installing Ollama..."
+        print_color "$BLUE" "-> Installing Ollama..."
         curl -fsSL https://ollama.ai/install.sh | sh
-        print_color "$GREEN" "✓ Ollama installed"
+        print_color "$GREEN" "[OK] Ollama installed"
     fi
 }
 
 start_ollama() {
-    print_color "$YELLOW" "🚀 Starting Ollama service..."
+    print_color "$YELLOW" "[*] Starting Ollama service..."
     
     # Check if ollama is already running
     if curl -s http://localhost:11434/api/tags &> /dev/null; then
-        print_color "$GREEN" "✓ Ollama is already running"
+        print_color "$GREEN" "[OK] Ollama is already running"
         return 0
     fi
     
     # Try to start ollama service
     if systemctl is-active --quiet ollama 2>/dev/null; then
-        print_color "$GREEN" "✓ Ollama service is running"
+        print_color "$GREEN" "[OK] Ollama service is running"
     else
         # Start ollama in background
-        print_color "$BLUE" "→ Starting Ollama..."
+        print_color "$BLUE" "-> Starting Ollama..."
         nohup ollama serve > /dev/null 2>&1 &
         sleep 3
         
         if curl -s http://localhost:11434/api/tags &> /dev/null; then
-            print_color "$GREEN" "✓ Ollama started"
+            print_color "$GREEN" "[OK] Ollama started"
         else
-            print_color "$YELLOW" "⚠ Could not start Ollama automatically"
+            print_color "$YELLOW" "[!] Could not start Ollama automatically"
             print_color "$YELLOW" "  Run 'ollama serve' in another terminal"
         fi
     fi
@@ -129,14 +129,14 @@ pull_model() {
     # Check if already configured (not first install)
     if [[ -f "$config_file" ]]; then
         local saved_model=$(cat "$config_file" 2>/dev/null)
-        print_color "$GREEN" "✓ Model already configured: $saved_model"
+        print_color "$GREEN" "[OK] Model already configured: $saved_model"
         print_color "$BLUE" "  To change model later, run: shlama --model"
         
         # Check if model is downloaded
         if ollama list 2>/dev/null | grep -q "$saved_model"; then
-            print_color "$GREEN" "✓ Model $saved_model is available"
+            print_color "$GREEN" "[OK] Model $saved_model is available"
         else
-            print_color "$YELLOW" "⚠ Model $saved_model not downloaded"
+            print_color "$YELLOW" "[!] Model $saved_model not downloaded"
             print_color "$YELLOW" "  Run: ollama pull $saved_model"
         fi
         return 0
@@ -146,7 +146,7 @@ pull_model() {
     # User can change later with: shlama --model
     local model="${SHLAMA_MODEL:-llama3.2}"
     
-    print_color "$CYAN" "📥 Setting up model: $model"
+    print_color "$CYAN" "[*] Setting up model: $model"
     
     # Save model to config
     mkdir -p "$(dirname "$config_file")"
@@ -154,18 +154,18 @@ pull_model() {
     
     # Check if model already downloaded
     if ollama list 2>/dev/null | grep -q "$model"; then
-        print_color "$GREEN" "✓ Model $model already available"
+        print_color "$GREEN" "[OK] Model $model already available"
     else
-        print_color "$YELLOW" "📥 Downloading $model (this may take a few minutes)..."
+        print_color "$YELLOW" "[*] Downloading $model (this may take a few minutes)..."
         ollama pull "$model"
-        print_color "$GREEN" "✓ Model $model downloaded"
+        print_color "$GREEN" "[OK] Model $model downloaded"
     fi
     
-    print_color "$BLUE" "💡 To change model later, run: shlama --model"
+    print_color "$BLUE" "[TIP] To change model later, run: shlama --model"
 }
 
 install_shlama() {
-    print_color "$YELLOW" "📥 Installing shlama..."
+    print_color "$YELLOW" "[*] Installing shlama..."
     
     local install_dir="/usr/local/bin"
     local tmp_file=$(mktemp)
@@ -177,33 +177,33 @@ install_shlama() {
     chmod +x "$tmp_file"
     sudo mv "$tmp_file" "$install_dir/shlama"
     
-    print_color "$GREEN" "✓ shlama installed to $install_dir/shlama"
+    print_color "$GREEN" "[OK] shlama installed to $install_dir/shlama"
 }
 
 verify_installation() {
-    print_color "$YELLOW" "🔍 Verifying installation..."
+    print_color "$YELLOW" "[*] Verifying installation..."
     
     if command -v shlama &> /dev/null; then
-        print_color "$GREEN" "✓ shlama is in PATH"
+        print_color "$GREEN" "[OK] shlama is in PATH"
     else
-        print_color "$RED" "✗ shlama not found in PATH"
+        print_color "$RED" "[X] shlama not found in PATH"
         return 1
     fi
     
     # Test help command
     if shlama --help &> /dev/null; then
-        print_color "$GREEN" "✓ shlama runs correctly"
+        print_color "$GREEN" "[OK] shlama runs correctly"
     else
-        print_color "$RED" "✗ shlama failed to run"
+        print_color "$RED" "[X] shlama failed to run"
         return 1
     fi
 }
 
 print_success() {
     echo ""
-    print_color "$GREEN" "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    print_color "$GREEN" "  ✅ Installation complete!"
-    print_color "$GREEN" "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    print_color "$GREEN" "-----------------------------------------"
+    print_color "$GREEN" "  [OK] Installation complete!"
+    print_color "$GREEN" "-----------------------------------------"
     echo ""
     print_color "$CYAN" "  Try it out:"
     print_color "$NC" "    shlama \"list all files\""
