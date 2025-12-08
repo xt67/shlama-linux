@@ -40,7 +40,7 @@ drwxr-xr-x  2 user user 4096 Dec  4 10:00 Documents
 ### APT Install (Ubuntu/Debian/Zorin/Mint)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/xt67/shlama/main/setup-repo.sh | sudo bash
+curl -fsSL https://raw.githubusercontent.com/xt67/shlama-linux/main/setup-repo.sh | sudo bash
 ```
 
 Then you can use apt to manage shlama:
@@ -52,14 +52,14 @@ sudo apt remove shlama     # Uninstall
 ### One-Line Install (All Linux Distros)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/xt67/shlama/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/xt67/shlama-linux/main/install.sh | bash
 ```
 
 This automatically installs:
 - ✅ shlama
 - ✅ Ollama (if not installed)
 - ✅ Required dependencies (jq, curl)
-- ✅ Downloads the default LLM model
+- ✅ Downloads the AI model of your choice
 
 That's it! Start using it:
 ```bash
@@ -73,7 +73,7 @@ shlama "list all files"
 sudo apt remove shlama
 
 # If installed via install.sh:
-curl -fsSL https://raw.githubusercontent.com/xt67/shlama/main/uninstall.sh | bash
+curl -fsSL https://raw.githubusercontent.com/xt67/shlama-linux/main/uninstall.sh | bash
 ```
 
 ---
@@ -102,7 +102,7 @@ ollama pull llama3.2
 
 ```bash
 # Clone the repository
-git clone https://github.com/xt67/shlama.git
+git clone https://github.com/xt67/shlama-linux.git
 cd shlama
 
 # Make it executable
@@ -156,17 +156,27 @@ shlama "create a new branch called feature"
 
 ## ⚙️ Configuration
 
-Configure shlama using environment variables:
+### Changing the AI Model
+
+You can change the AI model at any time:
+
+```bash
+shlama --model
+```
+
+This opens an interactive menu to select a different model.
+
+### Environment Variables
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `SHLAMA_MODEL` | `llama3.2` | Ollama model to use |
+| `SHLAMA_MODEL` | `llama3.2` | Ollama model to use (overrides saved config) |
 | `OLLAMA_HOST` | `http://localhost:11434` | Ollama API endpoint |
 
 ### Examples
 
 ```bash
-# Use a different model
+# Use a different model temporarily
 SHLAMA_MODEL=mistral shlama "list files"
 
 # Use remote Ollama instance

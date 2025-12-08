@@ -1,11 +1,11 @@
 #!/bin/bash
 # Add shlama repository and install
-# Usage: curl -fsSL https://raw.githubusercontent.com/xt67/shlama/main/setup-repo.sh | sudo bash
+# Usage: curl -fsSL https://raw.githubusercontent.com/xt67/shlama-linux/main/setup-repo.sh | sudo bash
 
 set -e
 
-REPO_URL="https://raw.githubusercontent.com/xt67/shlama/main"
-DEB_URL="https://github.com/xt67/shlama/releases/download/v1.0.0/shlama_1.0.0_all.deb"
+REPO_URL="https://raw.githubusercontent.com/xt67/shlama-linux/main"
+DEB_URL="https://github.com/xt67/shlama-linux/releases/download/v1.0.0/shlama_1.0.0_all.deb"
 
 echo ""
 echo "🦙 Setting up shlama repository..."

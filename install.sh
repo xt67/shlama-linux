@@ -29,7 +29,7 @@ print_banner() {
 check_root() {
     if [[ $EUID -eq 0 ]]; then
         print_color "$RED" "Error: Do not run this script as root/sudo"
-        print_color "$YELLOW" "Run it as: curl -fsSL https://raw.githubusercontent.com/xt67/shlama/main/install.sh | bash"
+        print_color "$YELLOW" "Run it as: curl -fsSL https://raw.githubusercontent.com/xt67/shlama-linux/main/install.sh | bash"
         exit 1
     fi
 }
@@ -124,6 +124,29 @@ start_ollama() {
 }
 
 pull_model() {
+    local config_file="$HOME/.config/shlama/config"
+    
+    # Check if already configured (not first install)
+    if [[ -f "$config_file" ]]; then
+        local saved_model=$(cat "$config_file" 2>/dev/null)
+        print_color "$GREEN" "✓ Model already configured: $saved_model"
+        print_color "$BLUE" "  To change model later, run: shlama --model"
+        
+        # Check if model is downloaded
+        if ollama list 2>/dev/null | grep -q "$saved_model"; then
+            print_color "$GREEN" "✓ Model $saved_model is available"
+        else
+            print_color "$YELLOW" "⚠ Model $saved_model not downloaded"
+            read -p "Download now? (y/N): " -n 1 -r
+            echo ""
+            if [[ $REPLY =~ ^[Yy]$ ]]; then
+                ollama pull "$saved_model"
+            fi
+        fi
+        return 0
+    fi
+    
+    # First time install - show model selection
     echo ""
     print_color "$CYAN" "🤖 Choose an AI model:"
     echo ""
@@ -144,7 +167,7 @@ pull_model() {
         4) model="mistral" ;;
         5) 
             print_color "$YELLOW" "⚠ Skipping model download"
-            print_color "$YELLOW" "  Run 'ollama pull <model>' later to download a model"
+            print_color "$YELLOW" "  Run 'shlama --model' later to select a model"
             return 0
             ;;
         *) model="llama3.2" ;;
@@ -152,6 +175,10 @@ pull_model() {
     
     # Override with environment variable if set
     model="${SHLAMA_MODEL:-$model}"
+    
+    # Save model to config
+    mkdir -p "$(dirname "$config_file")"
+    echo "$model" > "$config_file"
     
     print_color "$YELLOW" "📥 Pulling model ($model)..."
     
@@ -164,10 +191,7 @@ pull_model() {
         print_color "$GREEN" "✓ Model $model downloaded"
     fi
     
-    # Save the selected model as default
-    echo ""
-    print_color "$BLUE" "💡 Tip: To use this model by default, add to your ~/.bashrc:"
-    print_color "$NC" "   echo 'export SHLAMA_MODEL=$model' >> ~/.bashrc"
+    print_color "$GREEN" "✓ Model saved. To change later, run: shlama --model"
 }
 
 install_shlama() {
@@ -177,7 +201,7 @@ install_shlama() {
     local tmp_file=$(mktemp)
     
     # Download shlama
-    curl -fsSL "https://raw.githubusercontent.com/xt67/shlama/main/shlama" -o "$tmp_file"
+    curl -fsSL "https://raw.githubusercontent.com/xt67/shlama-linux/main/shlama" -o "$tmp_file"
     
     # Make executable and move to bin
     chmod +x "$tmp_file"
@@ -219,7 +243,7 @@ print_success() {
     print_color "$YELLOW" "  Make sure Ollama is running:"
     print_color "$NC" "    ollama serve"
     echo ""
-    print_color "$CYAN" "  Documentation: https://github.com/xt67/shlama"
+    print_color "$CYAN" "  Documentation: https://github.com/xt67/shlama-linux"
     echo ""
 }
 

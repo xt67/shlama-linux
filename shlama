@@ -1,13 +1,20 @@
 #!/bin/bash
 
-# 🦙 shlama - Your terminal llama
+# 🦙 shlama-linux - Your terminal llama
 # Natural language → safe Linux commands
 # Powered by Ollama
 
 set -e
 
 # Configuration
-MODEL="${SHLAMA_MODEL:-llama3.2}"
+CONFIG_FILE="$HOME/.config/shlama/config"
+DEFAULT_MODEL="llama3.2"
+
+# Load saved model from config, or use default
+if [[ -f "$CONFIG_FILE" ]]; then
+    SAVED_MODEL=$(cat "$CONFIG_FILE" 2>/dev/null)
+fi
+MODEL="${SHLAMA_MODEL:-${SAVED_MODEL:-$DEFAULT_MODEL}}"
 OLLAMA_HOST="${OLLAMA_HOST:-http://localhost:11434}"
 
 # Colors
@@ -64,9 +71,15 @@ generate_command() {
 main() {
     # Check for help flag
     if [[ "$1" == "-h" || "$1" == "--help" ]]; then
-        echo "🦙 shlama - Your terminal llama"
+        echo "🦙 shlama-linux - Your terminal llama"
         echo ""
         echo "Usage: shlama \"<natural language request>\""
+        echo ""
+        echo "Commands:"
+        echo "  shlama --model          Change the AI model"
+        echo "  shlama --model show     Show current model"
+        echo "  shlama --version        Show version"
+        echo "  shlama --help           Show this help"
         echo ""
         echo "Examples:"
         echo "  shlama \"list all files including hidden\""
@@ -75,7 +88,7 @@ main() {
         echo "  shlama \"install neofetch\""
         echo ""
         echo "Environment variables:"
-        echo "  SHLAMA_MODEL    - Ollama model to use (default: llama3.2)"
+        echo "  SHLAMA_MODEL    - Ollama model to use (overrides saved model)"
         echo "  OLLAMA_HOST     - Ollama API host (default: http://localhost:11434)"
         echo ""
         exit 0
@@ -83,7 +96,68 @@ main() {
 
     # Check for version flag
     if [[ "$1" == "-v" || "$1" == "--version" ]]; then
-        echo "shlama v1.0.0"
+        echo "shlama-linux v1.1.0"
+        exit 0
+    fi
+
+    # Check for model command
+    if [[ "$1" == "--model" || "$1" == "-m" ]]; then
+        if [[ "$2" == "show" || -z "$2" && "$1" == "--model" && -z "$2" ]]; then
+            # Show current model
+            if [[ "$2" == "show" ]]; then
+                echo "Current model: $MODEL"
+                if [[ -f "$CONFIG_FILE" ]]; then
+                    echo "Saved in: $CONFIG_FILE"
+                fi
+                exit 0
+            fi
+        fi
+        
+        # Model selection menu
+        echo ""
+        print_color "$CYAN" "🤖 Select an AI model:"
+        echo ""
+        echo "  1) llama3.2      - Fast & light (~2GB) [Recommended]"
+        echo "  2) llama3.2:1b   - Fastest, minimal (~1.3GB)"
+        echo "  3) llama3        - Balanced (~4.7GB)"
+        echo "  4) mistral       - Good quality (~4.1GB)"
+        echo "  5) Custom        - Enter model name manually"
+        echo ""
+        echo "Current model: $MODEL"
+        echo ""
+        read -p "Select [1-5]: " choice
+        
+        case "$choice" in
+            1) new_model="llama3.2" ;;
+            2) new_model="llama3.2:1b" ;;
+            3) new_model="llama3" ;;
+            4) new_model="mistral" ;;
+            5) 
+                read -p "Enter model name: " new_model
+                ;;
+            *) 
+                print_color "$RED" "Invalid choice"
+                exit 1
+                ;;
+        esac
+        
+        # Save to config
+        mkdir -p "$(dirname "$CONFIG_FILE")"
+        echo "$new_model" > "$CONFIG_FILE"
+        
+        print_color "$GREEN" "✓ Model changed to: $new_model"
+        
+        # Check if model is downloaded
+        if ! ollama list 2>/dev/null | grep -q "$new_model"; then
+            echo ""
+            read -p "Model not downloaded. Download now? (y/N): " -n 1 -r
+            echo ""
+            if [[ $REPLY =~ ^[Yy]$ ]]; then
+                print_color "$BLUE" "Downloading $new_model..."
+                ollama pull "$new_model"
+                print_color "$GREEN" "✓ Model downloaded"
+            fi
+        fi
         exit 0
     fi
 
