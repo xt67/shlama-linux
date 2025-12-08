@@ -34,11 +34,37 @@ print_color() {
 
 # Check if Ollama is running
 check_ollama() {
-    if ! curl -s "${OLLAMA_HOST}/api/tags" > /dev/null 2>&1; then
-        print_color "$RED" "Error: Ollama is not running."
-        print_color "$YELLOW" "Start it with: ollama serve"
-        exit 1
+    if curl -s "${OLLAMA_HOST}/api/tags" > /dev/null 2>&1; then
+        return 0
     fi
+    return 1
+}
+
+# Start Ollama if not running
+start_ollama_if_needed() {
+    if check_ollama; then
+        return 0
+    fi
+    
+    print_color "$YELLOW" "Starting Ollama..."
+    
+    # Start Ollama in background
+    nohup ollama serve > /dev/null 2>&1 &
+    
+    # Wait for it to start (max 10 seconds)
+    local attempts=0
+    while [ $attempts -lt 20 ]; do
+        sleep 0.5
+        if check_ollama; then
+            print_color "$GREEN" "✓ Ollama started"
+            return 0
+        fi
+        attempts=$((attempts + 1))
+    done
+    
+    print_color "$RED" "Error: Could not start Ollama"
+    print_color "$YELLOW" "Try running 'ollama serve' manually"
+    exit 1
 }
 
 # Generate command from natural language
@@ -181,8 +207,8 @@ main() {
         exit 1
     fi
 
-    # Check if Ollama is running
-    check_ollama
+    # Start Ollama if not running
+    start_ollama_if_needed
 
     # Generate the command
     print_color "$CYAN" "🦙 Thinking..."
